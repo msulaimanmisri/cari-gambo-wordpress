@@ -49,10 +49,10 @@ class InstallController
     /**
      * Load the Bootstrap CSS & JS within the plugin only
      */
-    public static function cariGamboLoadBootstrap($page)
+    public static function cariGamboLoadBootstrap()
     {
         $screen = get_current_screen();
-        if ($screen && $screen->id === 'toplevel_page_sm-cari-gambo' || $screen && $screen->id === 'cari-gambo_page_sm-cari-gambo-setting') {
+        if ($screen->id === 'toplevel_page_sm-cari-gambo' || $screen->id === 'cari-gambo_page_sm-cari-gambo-setting' || $screen->id === 'cari-gambo_page_sm-cari-gambo-search-images') {
             wp_enqueue_style('cari-gambo-bs', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css', '', false, 'all');
             wp_enqueue_style('cari-gambo-icon', 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css', '', false, 'all');
             wp_enqueue_script('cari-gambo-bs', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js', ['jquery'], false, true);
