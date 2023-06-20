@@ -18,6 +18,7 @@ class CoreController
      */
     public static function cariGamboMenuDetails()
     {
+        // Parents : Cari Gambo
         add_menu_page(
             'Cari Gambo',
             'Cari Gambo',
@@ -27,15 +28,7 @@ class CoreController
             'dashicons-images-alt'
         );
 
-        add_submenu_page(
-            'sm-cari-gambo',
-            'Setting',
-            'Setting',
-            'manage_options',
-            'sm-cari-gambo-setting',
-            [__CLASS__, 'showSettingPage'],
-        );
-
+        // Children Search Images
         add_submenu_page(
             'sm-cari-gambo',
             'Search Images',
@@ -45,6 +38,17 @@ class CoreController
             [__CLASS__, 'showSearchImagesPage'],
         );
 
+        // Children : Setting
+        add_submenu_page(
+            'sm-cari-gambo',
+            'Setting',
+            'Setting',
+            'manage_options',
+            'sm-cari-gambo-setting',
+            [__CLASS__, 'showSettingPage'],
+        );
+
+        // Children About
         add_submenu_page(
             'sm-cari-gambo',
             'About',
@@ -76,7 +80,7 @@ class CoreController
         $date = date('Y');
         echo "
         <div class='wrap mt-4 alert alert-warning shadow-sm rounded-3'>
-        <h4 class='text-dark'> Welcome to Cari Gambo WordPress</h4>
+        <h4 class='text-dark'> Welcome to Cari Gambo For WordPress</h4>
         <hr>
         <p class='fs-6'>
          Image is a crucial things to do in order to make your website very stunning. Using this plugin, 
@@ -99,7 +103,7 @@ class CoreController
         </div>
 
         <div class='col-3'>
-        <a href='' class='text-decoration-none text-secondary'>
+        <a href='/wp-admin/admin.php?page=sm-cari-gambo-search-images' class='text-decoration-none text-secondary'>
                 <div class='card border-0 card-body'>
                 <p class='fs-5 mb-0'>
                     Search Images <i class='bi bi-box-arrow-in-up-right'></i>
@@ -130,30 +134,98 @@ class CoreController
         $unsplashKey = get_option('unsplash_api_key');
 
         echo '
-    <div class="wrap mt-4 alert alert-warning shadow-sm rounded-3">
-        <h4 class="text-dark"> Setting Page </h4>
-        <hr>
-        <p class="fs-6">
-           In order to make this plugin work properly, you need to insert your Unsplash Access Key first
-        </p>
+        <div class="wrap mt-4 alert alert-warning shadow-sm rounded-3">
+            <h4 class="text-dark"> Setting Page </h4>
+            <hr>
+            <p class="fs-6">
+            In order to make this plugin work properly, you need to insert your Unsplash Access Key first
+            </p>
 
-        <p class="fs-6">
-            If you don\'t know how to get the Key, please refer to this link <a href="https://unsplash.com/developers" target="_blank"> Get Unsplash Access Key. </a>
-        </p>
-    </div>
+            <p class="fs-6">
+                If you don\'t know how to get the Key, please refer to this link <a href="https://unsplash.com/developers" target="_blank"> Get Unsplash Access Key. </a>
+            </p>
+        </div>
 
-    <div class="wrap mt-4">
-        <form action="" method="POST" class="form-group">
-            <label for="unsplash-api" class="form-label">Your Unsplash API / Access Key</label>
-            <input type="text" class="form-control mb-3" name="unsplash-api" value="' . esc_attr($unsplashKey) . '">
+        <div class="wrap mt-4">
+            <form action="" method="POST" class="form-group">
+                <label for="unsplash-api" class="form-label">Your Unsplash API / Access Key</label>
+                <input type="text" class="form-control mb-3" name="unsplash-api" value="' . esc_attr($unsplashKey) . '">
 
-            <div class="btn-cta">
-                <button class="btn btn-primary px-4 py-2" type="submit"> Save </button>
-            </div>
-        </form>
-    </div>';
+                <div class="btn-cta">
+                    <button class="btn btn-primary px-4 py-2" type="submit"> Save </button>
+                </div>
+            </form>
+        </div>
+    ';
     }
 
+    /**
+     * Load Search Image
+     */
+    public static function showSearchImagesPage()
+    {
+        $per_page = 28;
+        $orientation = 'portrait';
+        $unsplashKey = get_option('unsplash_api_key');
+        $data = '';
+        $error = '';
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (isset($_POST['keyword'])) {
+                $keyword = $_POST['keyword'];
+
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, "https://api.unsplash.com/search/photos?query=$keyword&client_id=$unsplashKey&per_page=$per_page");
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+                try {
+                    $response = curl_exec($ch);
+                    $data = $response;
+                } catch (Exception $e) {
+                    $error = 'Error fetching data. Please try again.';
+                }
+
+                curl_close($ch);
+            }
+        }
+
+        echo "
+        <div class='wrap my-4 alert alert-warning shadow-sm rounded-3'>
+            <h4 class='text-dark'> Search Image </h4>
+            <hr>
+            <p class='fs-6'>
+                Type any image keyword in the input form below. Then click enter. Your desired image will appear below.
+            </p>
+    
+            <form action='' method='POST' class='form-group'>
+                <input type='text' class='form-control mb-3' name='keyword'>
+            </form>
+        </div>
+    
+        <div class='imageResults wrap'>
+            <div class='row'>
+        ";
+
+        if (!empty($error)) {
+            echo "<div class='container'>";
+            echo "<div class='alert alert-danger'><span>$error</span></div>";
+            echo "</div>";
+        } elseif (!empty($data)) {
+            $result = json_decode($data, true);
+
+            foreach ($result['results'] as $photo) {
+                $imageUrl = $photo['urls']['regular'];
+                echo "<div class='col-3 py-2'>";
+                echo "<img src='$imageUrl' alt='unsepelesh-image' class='rounded-3 shadow-sm' style='width: 100%; height: 100%; object-fit: cover; ' loading='lazy'>";
+                echo "</div>";
+            }
+        }
+
+        echo "
+            </div>
+        </div>
+        ";
+    }
 
     /**
      * Load About Page
@@ -161,16 +233,37 @@ class CoreController
     public static function showAboutPage()
     {
         echo "
-        <div class='wrap mt-4 alert alert-warning shadow-sm rounded-3'>
-        <h4 class='text-dark'> Setting Page </h4>
+        <div class='col-4 mx-auto my-5 alert alert-warning shadow-sm rounded-3'>
+        <h4 class='text-dark'> Hi there, Sulaiman here. </h4>
         <hr>
         <p class='fs-6'>
-           In order to make this plugin work properly, you need to insert your Unsplash Access Key first
+         Thank you for install and using this simple plugin. I hope this plugin do help your development easier.
         </p>
 
         <p class='fs-6'>
-            If you don't know how to get the Key, please refer to this link <a href='https://unsplash.com/developers' target='_blank'> Get Unsplash Access Key. </a>
+        If you wanted to know about me and what I do, please click at the button below.
         </p>
+
+        <div class=''>
+        <a target='_blank' href='https://sulaimanmisri.com' class='text-decoration-none text-secondary'>
+            <div class='card border-0 card-body'>
+                <p class='fs-5 mb-0'>
+                View Portfolio <i class='bi bi-box-arrow-in-up-right'></i>
+                </p>
+            </div>
+        </a>
+        </div>
+
+        <div class=''>
+        <a target='_blank' href='https://bit.ly/daftar-kelas-design' class='text-decoration-none text-secondary'>
+                <div class='card border-0 card-body'>
+                <p class='fs-5 mb-0'>
+                   Learn With Me <i class='bi bi-box-arrow-in-up-right'></i>
+                </p>
+                </div>
+        </a>
+        </div>
+        </div>
         ";
     }
 }
