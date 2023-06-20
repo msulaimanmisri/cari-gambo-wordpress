@@ -4,7 +4,7 @@
  * @since 1.0.0
  */
 
-class InstallController
+class CoreController
 {
     public static function init()
     {
@@ -44,6 +44,15 @@ class InstallController
             'sm-cari-gambo-search-images',
             [__CLASS__, 'showSearchImagesPage'],
         );
+
+        add_submenu_page(
+            'sm-cari-gambo',
+            'About',
+            'About',
+            'manage_options',
+            'sm-cari-gambo-about',
+            [__CLASS__, 'showAboutPage'],
+        );
     }
 
     /**
@@ -52,13 +61,16 @@ class InstallController
     public static function cariGamboLoadBootstrap()
     {
         $screen = get_current_screen();
-        if ($screen->id === 'toplevel_page_sm-cari-gambo' || $screen->id === 'cari-gambo_page_sm-cari-gambo-setting' || $screen->id === 'cari-gambo_page_sm-cari-gambo-search-images') {
+        if ($screen->id === 'toplevel_page_sm-cari-gambo' || $screen->id === 'cari-gambo_page_sm-cari-gambo-setting' || $screen->id === 'cari-gambo_page_sm-cari-gambo-search-images' || $screen->id === 'cari-gambo_page_sm-cari-gambo-about') {
             wp_enqueue_style('cari-gambo-bs', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css', '', false, 'all');
             wp_enqueue_style('cari-gambo-icon', 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css', '', false, 'all');
             wp_enqueue_script('cari-gambo-bs', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js', ['jquery'], false, true);
         }
     }
 
+    /**
+     * Load Main Page or Splash Page
+     */
     public static function showMainPage()
     {
         $date = date('Y');
@@ -67,7 +79,8 @@ class InstallController
         <h4 class='text-dark'> Welcome to Cari Gambo WordPress</h4>
         <hr>
         <p class='fs-6'>
-            This plugin is a time-saver for your development work. Because you can search for any Royalty-Free images from the <a href='https://unsplash.com' target='_blank'>Unsplash Platform</a> .
+         Image is a crucial things to do in order to make your website very stunning. Using this plugin, 
+         you can download any Royalty-Fee by using <a href='https://unsplash.com'>Unsplash.</a>
         </p>
 
         <p class='fs-6'>
@@ -103,7 +116,49 @@ class InstallController
         ";
     }
 
+    /**
+     * Load Setting Page
+     */
     public static function showSettingPage()
+    {
+        if (isset($_POST['unsplash-api'])) {
+            $api_key = sanitize_text_field($_POST['unsplash-api']);
+            update_option('unsplash_api_key', $api_key);
+            echo '<div class="wrap mt-5 alert alert-success"><span>API Key saved successfully.</span></div>';
+        }
+
+        $unsplashKey = get_option('unsplash_api_key');
+
+        echo '
+    <div class="wrap mt-4 alert alert-warning shadow-sm rounded-3">
+        <h4 class="text-dark"> Setting Page </h4>
+        <hr>
+        <p class="fs-6">
+           In order to make this plugin work properly, you need to insert your Unsplash Access Key first
+        </p>
+
+        <p class="fs-6">
+            If you don\'t know how to get the Key, please refer to this link <a href="https://unsplash.com/developers" target="_blank"> Get Unsplash Access Key. </a>
+        </p>
+    </div>
+
+    <div class="wrap mt-4">
+        <form action="" method="POST" class="form-group">
+            <label for="unsplash-api" class="form-label">Your Unsplash API / Access Key</label>
+            <input type="text" class="form-control mb-3" name="unsplash-api" value="' . esc_attr($unsplashKey) . '">
+
+            <div class="btn-cta">
+                <button class="btn btn-primary px-4 py-2" type="submit"> Save </button>
+            </div>
+        </form>
+    </div>';
+    }
+
+
+    /**
+     * Load About Page
+     */
+    public static function showAboutPage()
     {
         echo "
         <div class='wrap mt-4 alert alert-warning shadow-sm rounded-3'>
@@ -120,4 +175,4 @@ class InstallController
     }
 }
 
-InstallController::init();
+CoreController::init();

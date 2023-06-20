@@ -24,4 +24,4 @@ if (!defined('ABSPATH')) {
  * Therefore, the user must have the Access Key in order to make it work.
  * @see https://unsplash.com/developers
  */
-require 'Controller/installController.php';
+require 'Controller/CoreController.php';
