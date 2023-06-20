@@ -182,7 +182,7 @@ class CoreController
                     $response = curl_exec($ch);
                     $data = $response;
                 } catch (Exception $e) {
-                    $error = 'Error fetching data. Please try again.';
+                    $error = 'Error fetching data. Please try again or please set your Access Key again.';
                 }
 
                 curl_close($ch);
@@ -190,42 +190,50 @@ class CoreController
         }
 
         echo "
-        <div class='wrap my-4 alert alert-warning shadow-sm rounded-3'>
-            <h4 class='text-dark'> Search Image </h4>
-            <hr>
-            <p class='fs-6'>
-                Type any image keyword in the input form below. Then click enter. Your desired image will appear below.
-            </p>
-    
-            <form action='' method='POST' class='form-group'>
-                <input type='text' class='form-control mb-3' name='keyword'>
-            </form>
-        </div>
-    
-        <div class='imageResults wrap'>
-            <div class='row'>
-        ";
+    <div class='wrap my-4 alert alert-warning shadow-sm rounded-3'>
+        <h4 class='text-dark'> Search Image </h4>
+        <hr>
+        <p class='fs-6'>
+            Type any image keyword in the input form below. Then click enter. Your desired image will appear below.
+        </p>
+
+        <form action='' method='POST' class='form-group'>
+            <input type='text' class='form-control mb-3' name='keyword'>
+        </form>
+    </div>
+
+    <div class='imageResults wrap'>
+        <div class='row'>
+    ";
 
         if (!empty($error)) {
-            echo "<div class='container'>";
+            echo "<div class='container error-div'>";
             echo "<div class='alert alert-danger'><span>$error</span></div>";
             echo "</div>";
         } elseif (!empty($data)) {
             $result = json_decode($data, true);
-
-            foreach ($result['results'] as $photo) {
-                $imageUrl = $photo['urls']['regular'];
-                echo "<div class='col-3 py-2'>";
-                echo "<img src='$imageUrl' alt='unsepelesh-image' class='rounded-3 shadow-sm' style='width: 100%; height: 100%; object-fit: cover; ' loading='lazy'>";
+            if (isset($result['results']) && is_array($result['results'])) {
+                foreach ($result['results'] as $photo) {
+                    $imageUrl = $photo['urls']['regular'];
+                    echo "<div class='col-3 py-2'>";
+                    echo "<img src='$imageUrl' alt='unsepelesh-image' class='rounded-3 shadow-sm' style='width: 100%; height: 100%; object-fit: cover; ' loading='lazy'>";
+                    echo "</div>";
+                }
+            } else {
+                $error = 'Error fetching data. Please try again or please set your Access Key again.';
+                echo "<div class='container error-div'>";
+                echo "<div class='alert alert-danger'><span>$error</span></div>";
                 echo "</div>";
             }
         }
 
         echo "
-            </div>
         </div>
-        ";
+    </div>
+    ";
     }
+
+
 
     /**
      * Load About Page
