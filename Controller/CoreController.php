@@ -156,7 +156,7 @@ class CoreController
                 </div>
             </form>
         </div>
-    ';
+        ';
     }
 
     /**
@@ -165,7 +165,6 @@ class CoreController
     public static function showSearchImagesPage()
     {
         $per_page = 28;
-        $orientation = 'portrait';
         $unsplashKey = get_option('unsplash_api_key');
         $data = '';
         $error = '';
@@ -174,37 +173,37 @@ class CoreController
             if (isset($_POST['keyword'])) {
                 $keyword = $_POST['keyword'];
 
-                $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, "https://api.unsplash.com/search/photos?query=$keyword&client_id=$unsplashKey&per_page=$per_page");
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                $curlInit = curl_init();
+                curl_setopt($curlInit, CURLOPT_URL, "https://api.unsplash.com/search/photos?client_id=$unsplashKey&query=$keyword&per_page=$per_page");
+                curl_setopt($curlInit, CURLOPT_RETURNTRANSFER, true);
 
                 try {
-                    $response = curl_exec($ch);
+                    $response = curl_exec($curlInit);
                     $data = $response;
-                } catch (Exception $e) {
+                } catch (Exception $error) {
                     $error = 'Error fetching data. Please try again or please set your Access Key again.';
                 }
 
-                curl_close($ch);
+                curl_close($curlInit);
             }
         }
 
         echo "
-    <div class='wrap my-4 alert alert-warning shadow-sm rounded-3'>
-        <h4 class='text-dark'> Search Image </h4>
-        <hr>
-        <p class='fs-6'>
-            Type any image keyword in the input form below. Then click enter. Your desired image will appear below.
-        </p>
+            <div class='wrap my-4 alert alert-warning shadow-sm rounded-3'>
+                <h4 class='text-dark'> Search Image </h4>
+                <hr>
+                <p class='fs-6'>
+                    Type any image keyword in the input form below. Then click enter. Your desired image will appear below.
+                </p>
 
-        <form action='' method='POST' class='form-group'>
-            <input type='text' class='form-control mb-3' name='keyword'>
-        </form>
-    </div>
+                <form action='' method='POST' class='form-group'>
+                    <input type='text' class='form-control mb-3' name='keyword'>
+                </form>
+            </div>
 
-    <div class='imageResults wrap'>
-        <div class='row'>
-    ";
+            <div class='imageResults wrap'>
+                <div class='row'>
+            ";
 
         if (!empty($error)) {
             echo "<div class='container error-div'>";
@@ -229,11 +228,9 @@ class CoreController
 
         echo "
         </div>
-    </div>
-    ";
+        </div>
+        ";
     }
-
-
 
     /**
      * Load About Page
